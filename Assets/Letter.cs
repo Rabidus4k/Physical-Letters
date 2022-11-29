@@ -6,7 +6,6 @@ public class Letter : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("SS");
-        Destroy(collision.gameObject);
+        SpawnPointsSetup.Instance.PickUpCollect(collision.gameObject);
     }
 }
