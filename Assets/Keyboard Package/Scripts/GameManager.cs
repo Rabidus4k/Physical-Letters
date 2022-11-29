@@ -36,7 +36,10 @@ public class GameManager : MonoBehaviour
             return;
 
         var newLetter = Instantiate(LettersDictionary[letter], CurrentLetterSpawners[currentLettersCount].transform.position, Quaternion.identity);
-        newLetter.GetComponent<Rigidbody2D>().isKinematic = true;
+        if (newLetter.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
+        {
+            rb.isKinematic = true;
+        }
         CurrentLetters.Add(newLetter);
         currentLettersCount++;
         if (currentLettersCount == CurrentLetterSpawners.Count)
@@ -47,7 +50,10 @@ public class GameManager : MonoBehaviour
     {
         foreach (var letters in CurrentLetters)
         {
-            letters.GetComponent<Rigidbody2D>().isKinematic = false;
+            if (letters.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
+            {
+                rb.isKinematic = false;
+            }
         }
         canAddLetters = false;
         foreach (var item in CurrentLetterSpawners)
