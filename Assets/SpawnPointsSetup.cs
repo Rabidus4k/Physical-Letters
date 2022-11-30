@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SpawnPointsSetup : MonoBehaviour
@@ -15,6 +16,7 @@ public class SpawnPointsSetup : MonoBehaviour
     public float LetterHeight = 8;
     public LetterSpawner LetterSpawnerPrefab;
     public GameObject CollectPrefab;
+    public Image TransitionImage;
 
     public List<LevelInfo> Levels = new List<LevelInfo>();
     [HideInInspector]
@@ -34,18 +36,30 @@ public class SpawnPointsSetup : MonoBehaviour
 
     private void Start()
     {
-        SelectLevel(SelectedLevel);
+        SelectedLevel = LevelDataHandler.Instance.ChosenLevel;
+        StartCoroutine(SelectLevel(SelectedLevel, true));
     }
 
-    private void SelectLevel(int selectedLevel)
+    private IEnumerator SelectLevel(int selectedLevel, bool isFirstTime)
     {
+        if (isFirstTime)
+        {
+            LeanTween.alpha(TransitionImage.rectTransform, 0, 0.7f);
+        }
+        else
+        {
+            LeanTween.alpha(TransitionImage.rectTransform, 1, 0.7f).setLoopPingPong(1);
+            yield return new WaitForSeconds(0.7f);
+        }
+        
+
+        TransitionImage.sprite = Levels[selectedLevel].Background;
+        Background.sprite = Levels[selectedLevel].Background;
         for (int i = 0; i < Levels.Count; i++)
         {
             Levels[i].gameObject.SetActive(i == selectedLevel);
         }
-
-        Background.sprite = Levels[SelectedLevel].Background;
-        Levels[SelectedLevel].SetUpLevel();
+        Levels[selectedLevel].SetUpLevel();
     }
 
     public void ResetLevel()
@@ -59,7 +73,14 @@ public class SpawnPointsSetup : MonoBehaviour
         Destroy(other);
 
         if (_spawnedCollectors.Count == 0)
-            SelectLevel(0);
+        {
+            PlayerPrefs.SetInt($"LEVEL {SelectedLevel}", 1);
+            SelectedLevel++;
+            if (SelectedLevel == Levels.Count)
+                OpenMenu();
+            else
+                StartCoroutine(SelectLevel(SelectedLevel, false));
+        }
     }
 
     public void SetUpLevel(List<Transform> spawnPoints, int lettersCount, float letterDistance, float letterHeight, Transform child)
@@ -105,7 +126,15 @@ public class SpawnPointsSetup : MonoBehaviour
             newX += LetterDistance;
             LetterSpawned.Add(newLetterSpawner);
         }
-
+        LetterSpawned[0].ShowCursor();
+        GameManager.Instance.CurrentLetterSpawners = LetterSpawned;
         yield return null;
+    }
+
+
+    public void OpenMenu()
+    {
+        LevelDataHandler.Instance.Sprite = TransitionImage.sprite;
+        LeanTween.alpha(TransitionImage.rectTransform, 1, 0.7f).setOnComplete(() => { SceneManager.LoadScene(0); });
     }
 }

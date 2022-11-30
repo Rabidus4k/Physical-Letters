@@ -9,21 +9,20 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public GameObject[] LetterPrefab;
+    public RectTransform KeyBoard;
 
 
     private System.Collections.Generic.Dictionary<string, GameObject> LettersDictionary = new System.Collections.Generic.Dictionary<string, GameObject>();
 
-    private System.Collections.Generic.List<LetterSpawner> CurrentLetterSpawners = new System.Collections.Generic.List<LetterSpawner>();
+    public System.Collections.Generic.List<LetterSpawner> CurrentLetterSpawners = new System.Collections.Generic.List<LetterSpawner>();
     private System.Collections.Generic.List<GameObject> CurrentLetters = new System.Collections.Generic.List<GameObject>();
     private int currentLettersCount = 0;
 
     private bool canAddLetters = true;
     private void Start()
     {
-        Application.targetFrameRate = 60;
         Instance = this;
         LettersDictionary = LetterPrefab.ToDictionary(item => item.name, item => item);
-        CurrentLetterSpawners = GetComponent<SpawnPointsSetup>().LetterSpawned;
     }
 
     public void DeleteLetter()
@@ -33,10 +32,12 @@ public class GameManager : MonoBehaviour
 
         if (CurrentLetters.Count > 0)
         {
+            CurrentLetterSpawners[currentLettersCount].HideCursor();
             var letterIndex = CurrentLetters.Count - 1;
             Destroy(CurrentLetters[letterIndex].gameObject);
             CurrentLetters.RemoveAt(letterIndex);
             currentLettersCount--;
+            CurrentLetterSpawners[currentLettersCount].ShowCursor();
         }
     }
 
@@ -63,9 +64,15 @@ public class GameManager : MonoBehaviour
 
 
         CurrentLetters.Add(newLetter);
+
+        CurrentLetterSpawners[currentLettersCount].HideCursor();
+
         currentLettersCount++;
+
         if (currentLettersCount == CurrentLetterSpawners.Count)
             SubmitWord();
+        else
+            CurrentLetterSpawners[currentLettersCount].ShowCursor();
     }
 
     public void SubmitWord()
@@ -91,6 +98,7 @@ public class GameManager : MonoBehaviour
             item.gameObject.SetActive(false);
         }
 
+        LeanTween.move(KeyBoard, new Vector3(0, -KeyBoard.rect.height, 0), 0.2f);
         StartCoroutine(RestartLevelWithDelay(5));
     }
 
@@ -108,6 +116,7 @@ public class GameManager : MonoBehaviour
         {
             item.gameObject.SetActive(true);
         }
+        LeanTween.move(KeyBoard, new Vector3(0, 0, 0), 0.2f);
     }
 
     public void RestartLevel(float delay)
@@ -120,4 +129,5 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         RestartLevel();
     }
+
 }
