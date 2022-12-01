@@ -22,12 +22,14 @@ public class SpawnPointsSetup : MonoBehaviour
     [HideInInspector]
     public List<LetterSpawner> LetterSpawned = new List<LetterSpawner>();
 
-    private List<Transform> _spawnPoints = new List<Transform>();
-
-    private List<GameObject> _spawnedCollectors = new List<GameObject>();
-
     [HideInInspector]
     public int SelectedLevel;
+
+    [Space]
+    [Header("DEBUG")]
+    public int Level;
+
+    public RestoreObject[] RestoreGameObjects = new RestoreObject[] { };
 
     private void Awake()
     {
@@ -36,7 +38,10 @@ public class SpawnPointsSetup : MonoBehaviour
 
     private void Start()
     {
-        SelectedLevel = LevelDataHandler.Instance.ChosenLevel;
+        if (LevelDataHandler.Instance != null)
+            SelectedLevel = LevelDataHandler.Instance.ChosenLevel;
+        else
+            SelectedLevel = Level;
         StartCoroutine(SelectLevel(SelectedLevel, true));
     }
 
@@ -67,12 +72,12 @@ public class SpawnPointsSetup : MonoBehaviour
         Levels[SelectedLevel].SetUpLevel();
     }
 
+    private int collectCount;
     public void PickUpCollect(GameObject other)
     {
-        _spawnedCollectors.Remove(other);
-        Destroy(other);
-
-        if (_spawnedCollectors.Count == 0)
+        other.SetActive(false);
+        collectCount--;
+        if (collectCount == 0)
         {
             PlayerPrefs.SetInt($"LEVEL {SelectedLevel}", 1);
             SelectedLevel++;
@@ -83,32 +88,25 @@ public class SpawnPointsSetup : MonoBehaviour
         }
     }
 
-    public void SetUpLevel(List<Transform> spawnPoints, int lettersCount, float letterDistance, float letterHeight, Transform child)
+    public void SetUpLevel(LevelInfo levelInfo)
     {
-        StartCoroutine(SetUpLevelCoroutine(spawnPoints, lettersCount, letterDistance, letterHeight, child));
+        StartCoroutine(SetUpLevelCoroutine(levelInfo));
     }
 
-    private IEnumerator SetUpLevelCoroutine(List<Transform> spawnPoints, int lettersCount, float letterDistance, float letterHeight, Transform child)
+    private IEnumerator SetUpLevelCoroutine(LevelInfo levelInfo)
     {
         GameManager.Instance.RestartLevel();
 
-        _spawnPoints = spawnPoints;
-
-        foreach (var collector in _spawnedCollectors)
+        RestoreGameObjects = levelInfo.restoreObjects;
+        collectCount = levelInfo.CollectorsCount;
+        foreach (var item in RestoreGameObjects)
         {
-            Destroy(collector);
-        }
-        _spawnedCollectors.Clear();
-
-        foreach (var point in _spawnPoints)
-        {
-            var collect = Instantiate(CollectPrefab, point.position, Quaternion.identity);
-            _spawnedCollectors.Add(collect);
+            item.gameObject.SetActive(true);
         }
 
-        LettersCount = lettersCount;
-        LetterDistance = letterDistance;
-        LetterHeight = letterHeight;
+        LettersCount = levelInfo.LetterInfos.Count;
+        LetterDistance = levelInfo.LetterDistance;
+        LetterHeight = levelInfo.LetterHeight;
 
         foreach (var item in LetterSpawned)
         {
@@ -122,11 +120,15 @@ public class SpawnPointsSetup : MonoBehaviour
         for (int i = 0; i < LettersCount; i++)
         {
             LetterSpawner newLetterSpawner = Instantiate(LetterSpawnerPrefab, new Vector3(newX, LetterHeight, 0), Quaternion.identity);
-            newLetterSpawner.transform.parent = child;
+            newLetterSpawner.Mass = levelInfo.LetterInfos[i].LetterMass;
+            newLetterSpawner.transform.parent = levelInfo.transform;
             newX += LetterDistance;
             LetterSpawned.Add(newLetterSpawner);
+            newLetterSpawner.UpdateTipText(levelInfo.CorrectWord[i]);
         }
         LetterSpawned[0].ShowCursor();
+        if (levelInfo.ShowTipsOnStart)
+            ShowTips();
         GameManager.Instance.CurrentLetterSpawners = LetterSpawned;
         yield return null;
     }
@@ -136,5 +138,13 @@ public class SpawnPointsSetup : MonoBehaviour
     {
         LevelDataHandler.Instance.Sprite = TransitionImage.sprite;
         LeanTween.alpha(TransitionImage.rectTransform, 1, 0.7f).setOnComplete(() => { SceneManager.LoadScene(0); });
+    }
+
+    public void ShowTips()
+    {
+        foreach (var letter in LetterSpawned)
+        {
+            letter.ShowTip();
+        }
     }
 }

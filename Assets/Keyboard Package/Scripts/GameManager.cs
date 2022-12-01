@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
         if (newLetter.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
         {
             rb.isKinematic = true;
+            rb.mass = CurrentLetterSpawners[currentLettersCount].Mass;
         }
 
         if (newLetter.transform.childCount > 0)
@@ -127,7 +128,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator RestartLevelWithDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        RestartLevel();
+        GetComponent<SpawnPointsSetup>().ResetLevel();
     }
 
 }

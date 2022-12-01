@@ -1,35 +1,38 @@
 using Shapes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public class LetterInfo 
+{
+    public float LetterMass = 1;
+}
+
 public class LevelInfo : MonoBehaviour
 {
+    public List<LetterInfo> LetterInfos = new List<LetterInfo>();
     public Sprite Background;
-
-    public int LettersCount = 4;
     public float LetterDistance = 2.5f;
     public float LetterHeight = 8;
+    public RestoreObject[] restoreObjects = new RestoreObject[]{ };
+    public int CollectorsCount;
 
     private SpawnPointsSetup SpawnPointsSetup;
-    public List<Transform> SpawnPoints = new List<Transform>();
 
-    public Color MeshColor;
-
-    public List<ShapeRenderer> shapes = new List<ShapeRenderer>();
+    public string CorrectWord;
+    public bool ShowTipsOnStart;
 
     private void Awake()
     {
         SpawnPointsSetup = FindObjectOfType<SpawnPointsSetup>();
     }
 
+
     [ContextMenu("Set up level")]
     public void SetUpLevel()
     {
-        foreach (var shape in shapes)
-        {
-            shape.Color = MeshColor;
-        }
-        SpawnPointsSetup.SetUpLevel(SpawnPoints, LettersCount, LetterDistance, LetterHeight, transform);
+        SpawnPointsSetup.SetUpLevel(this);
     }
 }
