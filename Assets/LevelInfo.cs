@@ -19,6 +19,7 @@ public class LevelInfo : MonoBehaviour
     public RestoreObject[] restoreObjects = new RestoreObject[]{ };
     public int CollectorsCount;
 
+    public float TimeToEnd = 5;
     private SpawnPointsSetup SpawnPointsSetup;
 
     public string CorrectWord;

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5298584540968734770}
   - component: {fileID: 5298584540968734773}
   - component: {fileID: -7667342124224908666}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: i
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 4611586496473478124}
   - component: {fileID: 8763626894339381007}
   - component: {fileID: 9115241803152841114}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -252,7 +252,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: ae259c1dbba20984c909259790ad9622, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1

@@ -17,7 +17,9 @@ public class SpawnPointsSetup : MonoBehaviour
     public LetterSpawner LetterSpawnerPrefab;
     public GameObject CollectPrefab;
     public Image TransitionImage;
+    
 
+    public LevelInfo CurrentLevel { get => Levels[SelectedLevel]; }
     public List<LevelInfo> Levels = new List<LevelInfo>();
     [HideInInspector]
     public List<LetterSpawner> LetterSpawned = new List<LetterSpawner>();
@@ -95,6 +97,7 @@ public class SpawnPointsSetup : MonoBehaviour
 
     private IEnumerator SetUpLevelCoroutine(LevelInfo levelInfo)
     {
+        GameManager.Instance.CurrentLetterSpawners = LetterSpawned;
         GameManager.Instance.RestartLevel();
 
         RestoreGameObjects = levelInfo.restoreObjects;
@@ -129,7 +132,6 @@ public class SpawnPointsSetup : MonoBehaviour
         LetterSpawned[0].ShowCursor();
         if (levelInfo.ShowTipsOnStart)
             ShowTips();
-        GameManager.Instance.CurrentLetterSpawners = LetterSpawned;
         yield return null;
     }
 

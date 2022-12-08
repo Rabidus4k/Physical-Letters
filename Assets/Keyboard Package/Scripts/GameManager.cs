@@ -50,8 +50,8 @@ public class GameManager : MonoBehaviour
 
         if (newLetter.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
         {
-            rb.isKinematic = true;
             rb.mass = CurrentLetterSpawners[currentLettersCount].Mass;
+            rb.Sleep();
         }
 
         if (newLetter.transform.childCount > 0)
@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
            
             if (newLetter.transform.GetChild(0).TryGetComponent<Rigidbody2D>(out Rigidbody2D subRb))
             {
-                subRb.isKinematic = true;
+                subRb.Sleep();
             }
         }
 
@@ -82,14 +82,14 @@ public class GameManager : MonoBehaviour
         {
             if (letters.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
             {
-                rb.isKinematic = false;
+                rb.WakeUp();
             }
 
             if (letters.transform.childCount > 0)
             {
                 if (letters.transform.GetChild(0).TryGetComponent<Rigidbody2D>(out Rigidbody2D subRb))
                 {
-                    subRb.isKinematic = false;
+                    subRb.WakeUp();
                 }
             }
         }
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         }
 
         LeanTween.move(KeyBoard, new Vector3(0, -KeyBoard.rect.height, 0), 0.2f);
-        StartCoroutine(RestartLevelWithDelay(5));
+        StartCoroutine(RestartLevelWithDelay(SpawnPointsSetup.Instance.CurrentLevel.TimeToEnd));
     }
 
     public void RestartLevel()
